@@ -292,6 +292,8 @@ namespace VoltageDetect
                 } finally {
                     buttonUart1Sw.Text = "Open";
                     comboBoxUart1.Enabled = true;
+
+
                 }
 
             }
