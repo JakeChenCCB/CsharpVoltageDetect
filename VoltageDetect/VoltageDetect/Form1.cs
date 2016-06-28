@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,9 @@ namespace VoltageDetect
         int FIFOPtr = 0;
         byte[] cdc1Bytes = new byte[512];
         int FIFOPtr1 = 0;
+        float mahSum = 0.0F;
+        String filePath = String.Empty;
+        String preDateTime = String.Empty;
         public Form1()
         {
             InitializeComponent();
@@ -127,35 +131,85 @@ namespace VoltageDetect
                                 delegate
                                 {
                                     String newStr = String.Empty;
-
-                                    if((cdcBytes[9] == 0x00) && (cdcBytes[10] == 0x80)) {
-                                        newStr += Convert.ToString(cdcBytes[1] - 0x30);
-                                        newStr += '.';
-                                        newStr += Convert.ToString(cdcBytes[2] - 0x30);
-                                        newStr += Convert.ToString(cdcBytes[3] - 0x30);
-                                        newStr += Convert.ToString(cdcBytes[4] - 0x30);
-                                        labelUint.Text = "   V";
-                                    } else if((cdcBytes[9] == 0x40) && (cdcBytes[10] == 0x40)) {
-                                        newStr += Convert.ToString(cdcBytes[1] - 0x30);
-                                        newStr += Convert.ToString(cdcBytes[2] - 0x30);
-                                        newStr += '.';
-                                        newStr += Convert.ToString(cdcBytes[3] - 0x30);
-                                        newStr += Convert.ToString(cdcBytes[4] - 0x30);
-                                        labelUint.Text = "  mA";
-                                    } else if((cdcBytes[9] == 0x00) && (cdcBytes[10] == 0x40)) {
-                                        newStr += Convert.ToString(cdcBytes[1] - 0x30);
-                                        newStr += '.';
-                                        newStr += Convert.ToString(cdcBytes[2] - 0x30);
-                                        newStr += Convert.ToString(cdcBytes[3] - 0x30);
-                                        newStr += Convert.ToString(cdcBytes[4] - 0x30);
-                                        labelUint.Text = "   A";
-                                    } else if((cdcBytes[9] == 0x40) && (cdcBytes[10] == 0x80)) {
-                                        newStr += Convert.ToString(cdcBytes[1] - 0x30);
-                                        newStr += Convert.ToString(cdcBytes[2] - 0x30);
-                                        newStr += Convert.ToString(cdcBytes[3] - 0x30);
-                                        newStr += '.';
-                                        newStr += Convert.ToString(cdcBytes[4] - 0x30);
-                                        labelUint.Text = "  mV";
+                                    if((cdcBytes[11] & 0x80) == 0x80) {
+                                        newStr += '-';
+                                    }
+                                    for(int i = 0; i < 4; i++) {
+                                        if(cdcBytes[i + 1] == 0x3f) {
+                                            newStr += ' ';
+                                        } else if(cdcBytes[i + 1] == 0x3a) {
+                                            newStr += 'L';
+                                        } else {
+                                            newStr += Convert.ToString(cdcBytes[i + 1] - 0x30);
+                                        }
+                                        if((cdcBytes[6] & (1 << i)) != 0) {
+                                            newStr += '.';
+                                        }
+                                    }
+                                    switch(cdcBytes[10]) {
+                                        case 0x80:
+                                            switch(cdcBytes[9]) {
+                                                case 0x00:
+                                                    labelUint.Text = "V";
+                                                    break;
+                                                case 0x04:
+                                                    labelUint.Text = "D:" + " V";
+                                                    break;
+                                                case 0x40:
+                                                    labelUint.Text = "mV";
+                                                    break;
+                                                default:
+                                                    labelUint.Text = "Uint";
+                                                    break;
+                                            }
+                                            break;
+                                        case 0x40:
+                                            switch(cdcBytes[9]) {
+                                                case 0x00:
+                                                    labelUint.Text = "A";
+                                                    break;
+                                                case 0x40:
+                                                    labelUint.Text = "mA";
+                                                    break;
+                                                case 0x80:
+                                                    labelUint.Text = "uA";
+                                                    break;
+                                                default:
+                                                    labelUint.Text = "Uint";
+                                                    break;
+                                            }
+                                            break;
+                                        case 0x20:
+                                            switch(cdcBytes[9]) {
+                                                case 0x00:
+                                                    labelUint.Text = "Ω";
+                                                    break;
+                                                case 0x20:
+                                                    labelUint.Text = "kΩ";
+                                                    break;
+                                                case 0x10:
+                                                    labelUint.Text = "MΩ";
+                                                    break;
+                                                default:
+                                                    labelUint.Text = "Uint";
+                                                    break;
+                                            }
+                                            break;
+                                        case 0x02:
+                                            labelUint.Text = "℃";
+                                            break;
+                                        case 0x08:
+                                            labelUint.Text = "Hz";
+                                            break;
+                                        case 0x04:
+                                            labelUint.Text = "nF";
+                                            break;
+                                        case 0x10:
+                                            labelUint.Text = "hFE";
+                                            break;
+                                        default:
+                                            labelUint.Text = "Uint";
+                                            break;
                                     }
                                     labelValue.Text = newStr;
 
@@ -177,6 +231,8 @@ namespace VoltageDetect
                 }
             } else {
                 // 如果其实头不对，抛弃数据直到真确
+                labelUint.Text = "Uint";
+                labelValue.Text = "Value";
                 FIFOPtr = 0;
             }
         }
@@ -221,35 +277,87 @@ namespace VoltageDetect
                                 delegate
                                 {
                                     String newStr = String.Empty;
-                                    if((cdc1Bytes[9] == 0x00) && (cdc1Bytes[10] == 0x80)) {
-                                        newStr += Convert.ToString(cdc1Bytes[1] - 0x30);
-                                        newStr += '.';
-                                        newStr += Convert.ToString(cdc1Bytes[2] - 0x30);
-                                        newStr += Convert.ToString(cdc1Bytes[3] - 0x30);
-                                        newStr += Convert.ToString(cdc1Bytes[4] - 0x30);
-                                        labelUint1.Text = "   V";
-                                    } else if((cdc1Bytes[9] == 0x40) && (cdc1Bytes[10] == 0x40)) {
-                                        newStr += Convert.ToString(cdc1Bytes[1] - 0x30);
-                                        newStr += Convert.ToString(cdc1Bytes[2] - 0x30);
-                                        newStr += '.';
-                                        newStr += Convert.ToString(cdc1Bytes[3] - 0x30);
-                                        newStr += Convert.ToString(cdc1Bytes[4] - 0x30);
-                                        labelUint1.Text = "  mA";
-                                    } else if((cdc1Bytes[9] == 0x00) && (cdc1Bytes[10] == 0x40)) {
-                                        newStr += Convert.ToString(cdc1Bytes[1] - 0x30);
-                                        newStr += '.';
-                                        newStr += Convert.ToString(cdc1Bytes[2] - 0x30);
-                                        newStr += Convert.ToString(cdc1Bytes[3] - 0x30);
-                                        newStr += Convert.ToString(cdc1Bytes[4] - 0x30);
-                                        labelUint1.Text = "   A";
-                                    } else if((cdc1Bytes[9] == 0x40) && (cdc1Bytes[10] == 0x80)) {
-                                        newStr += Convert.ToString(cdc1Bytes[1] - 0x30);
-                                        newStr += Convert.ToString(cdc1Bytes[2] - 0x30);
-                                        newStr += Convert.ToString(cdc1Bytes[3] - 0x30);
-                                        newStr += '.';
-                                        newStr += Convert.ToString(cdc1Bytes[4] - 0x30);
-                                        labelUint1.Text = "  mV";
+                                    if((cdc1Bytes[11] & 0x80) == 0x80) {
+                                        newStr += '-';
                                     }
+                                    for(int i = 0; i < 4; i++) {
+                                        if(cdc1Bytes[i+1] == 0x3f) {
+                                            newStr += ' ';
+                                        } else if(cdc1Bytes[i+1] == 0x3a) {
+                                            newStr += 'L';
+                                        } else {
+                                            newStr += Convert.ToString(cdc1Bytes[i + 1] - 0x30);
+                                        }
+                                        if((cdc1Bytes[6] & (1 << i)) != 0) {
+                                            newStr += '.';
+                                        }
+                                    }
+                                    switch(cdc1Bytes[10]) {
+                                        case 0x80:
+                                            switch(cdc1Bytes[9]) {
+                                                case 0x00:
+                                                    labelUint1.Text = "V";
+                                                    break;
+                                                case 0x04:
+                                                    labelUint1.Text = "D:" + " V";
+                                                    break;
+                                                case 0x40:
+                                                    labelUint1.Text = "mV";
+                                                    break;
+                                                default:
+                                                    labelUint1.Text = "Uint";
+                                                    break;
+                                            }
+                                            break;
+                                        case 0x40:
+                                            switch(cdc1Bytes[9]) {
+                                                case 0x00:
+                                                    labelUint1.Text = "A";
+                                                    break;
+                                                case 0x40:
+                                                    labelUint1.Text = "mA";
+                                                    break;
+                                                case 0x80:
+                                                    labelUint1.Text = "uA";
+                                                    break;
+                                                default:
+                                                    labelUint1.Text = "Uint";
+                                                    break;
+                                            }
+                                            break;
+                                        case 0x20:
+                                            switch(cdc1Bytes[9]) {
+                                                case 0x00:
+                                                    labelUint1.Text = "Ω";
+                                                    break;
+                                                case 0x20:
+                                                    labelUint1.Text = "kΩ";
+                                                    break;
+                                                case 0x10:
+                                                    labelUint1.Text = "MΩ";
+                                                    break;
+                                                default:
+                                                    labelUint1.Text = "Uint";
+                                                    break;
+                                            }
+                                            break;
+                                        case 0x02:
+                                            labelUint1.Text = "℃";
+                                            break;
+                                        case 0x08:
+                                            labelUint1.Text = "Hz";
+                                            break;
+                                        case 0x04:
+                                            labelUint1.Text = "nF";
+                                            break;
+                                        case 0x10:
+                                            labelUint1.Text = "hFE";
+                                            break;
+                                        default:
+                                            labelUint1.Text = "Uint";
+                                            break;
+                                    }
+                                   
                                     labelValue1.Text = newStr;
 
                                     // 对TXT进行数据备份
@@ -270,6 +378,8 @@ namespace VoltageDetect
                 }
             } else {
                 // 如果其实头不对，抛弃数据直到真确
+                labelUint1.Text = "Uint";
+                labelValue1.Text = "Value";
                 FIFOPtr1 = 0;
             }
         }
@@ -292,8 +402,6 @@ namespace VoltageDetect
                 } finally {
                     buttonUart1Sw.Text = "Open";
                     comboBoxUart1.Enabled = true;
-
-
                 }
 
             }
@@ -302,21 +410,60 @@ namespace VoltageDetect
         private void timerSecond_Tick(object sender, EventArgs e)
         {
             count++;
+            if(labelUint1.Text == "mA") {
+                mahSum += (float.Parse(labelValue1.Text))/3600.0F;
+            }
             if(buttonUartSw.Text == "Close" && buttonUart1Sw.Text == "Close") {
-                string str = count.ToString() + '\t' + labelValue.Text + '\t' + labelUint.Text + '\t' + labelValue1.Text + '\t' + labelUint1.Text;
+                string str = count.ToString() + '\t' + labelValue.Text + '\t' + labelUint.Text + '\t' + labelValue1.Text + '\t' + labelUint1.Text + '\t' + mahSum.ToString() + '\t' + "mAh";
                 textBoxVolAndCrt.AppendText(str);
                 textBoxVolAndCrt.AppendText(Environment.NewLine);
                 textBoxVolAndCrt.ScrollToCaret();
+                // 对TXT进行数据备份
+                if(filePath != String.Empty) {
+                    if(preDateTime != DateTime.Now.ToString()) {
+                        StreamWriter sw = new StreamWriter(filePath, true);
+                        preDateTime = DateTime.Now.ToString();
+                        sw.WriteLine("" + DateTime.Now.ToString() + "\t" + str);
+                        sw.Close();
+                    }
+                }
+            }
+        }
 
+        private void buttonExport_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFile = new SaveFileDialog();
 
+            saveFile.Filter = "文本文件(*.txt)|*.txt";
+            if(saveFile.ShowDialog() == DialogResult.OK) {
+                StreamWriter sw = new StreamWriter(saveFile.FileName, true);
+                filePath = saveFile.FileName;
+                sw.WriteLine("日期 时间 数据");
+                sw.Close();
+            }
+        }
 
-                //textBoxVolAndCrt.Text += str;
-                //textBoxDisplay1.AppendText(newStr);
-                //textBoxDisplay1.AppendText(Environment.NewLine);
-                //textBoxDisplay1.ScrollToCaret();
-                //textBoxDisplay1.Focus();
-                //textBoxDisplay1.Select(textBoxDisplay1.TextLength, 0);
-                //textBoxDisplay1.ScrollToCaret();
+        private void buttonAutoSave_Click(object sender, EventArgs e)
+        {
+            if(buttonAutoSave.Text == "AutoSave") {
+                StreamWriter sw = new StreamWriter(@"log.txt", true);
+                filePath = @"log.txt";
+                sw.WriteLine("日期 时间 数据");
+                sw.Close();
+                buttonAutoSave.Text = "Saving";
+            } else {
+                filePath = String.Empty;
+                buttonAutoSave.Text = "AutoSave";
+            }
+
+        }
+
+        private void buttonDeleteLog_Click(object sender, EventArgs e)
+        {
+            if(buttonAutoSave.Text == "Saving") {
+                buttonAutoSave.Text = "AutoSave";
+            } if(File.Exists(@"log.txt")) {
+                File.Delete(@"log.txt");
             }
         }
     }

@@ -45,6 +45,9 @@
             this.label2 = new System.Windows.Forms.Label();
             this.textBoxVolAndCrt = new System.Windows.Forms.TextBox();
             this.timerSecond = new System.Windows.Forms.Timer(this.components);
+            this.buttonExport = new System.Windows.Forms.Button();
+            this.buttonAutoSave = new System.Windows.Forms.Button();
+            this.buttonDeleteLog = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // serialPortUart
@@ -148,12 +151,14 @@
             // 
             this.labelUint1.AutoSize = true;
             this.labelUint1.Font = new System.Drawing.Font("宋体", 48F, System.Drawing.FontStyle.Bold);
+            this.labelUint1.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
             this.labelUint1.Location = new System.Drawing.Point(369, 294);
             this.labelUint1.Name = "labelUint1";
-            this.labelUint1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.labelUint1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.labelUint1.Size = new System.Drawing.Size(160, 64);
             this.labelUint1.TabIndex = 9;
             this.labelUint1.Text = "Uint";
+            this.labelUint1.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // serialPortUart1
             // 
@@ -184,7 +189,7 @@
             this.textBoxVolAndCrt.Multiline = true;
             this.textBoxVolAndCrt.Name = "textBoxVolAndCrt";
             this.textBoxVolAndCrt.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxVolAndCrt.Size = new System.Drawing.Size(264, 303);
+            this.textBoxVolAndCrt.Size = new System.Drawing.Size(396, 303);
             this.textBoxVolAndCrt.TabIndex = 12;
             // 
             // timerSecond
@@ -193,11 +198,44 @@
             this.timerSecond.Interval = 1000;
             this.timerSecond.Tick += new System.EventHandler(this.timerSecond_Tick);
             // 
+            // buttonExport
+            // 
+            this.buttonExport.Location = new System.Drawing.Point(999, 55);
+            this.buttonExport.Name = "buttonExport";
+            this.buttonExport.Size = new System.Drawing.Size(75, 23);
+            this.buttonExport.TabIndex = 13;
+            this.buttonExport.Text = "Export";
+            this.buttonExport.UseVisualStyleBackColor = true;
+            this.buttonExport.Click += new System.EventHandler(this.buttonExport_Click);
+            // 
+            // buttonAutoSave
+            // 
+            this.buttonAutoSave.Location = new System.Drawing.Point(1000, 85);
+            this.buttonAutoSave.Name = "buttonAutoSave";
+            this.buttonAutoSave.Size = new System.Drawing.Size(75, 23);
+            this.buttonAutoSave.TabIndex = 14;
+            this.buttonAutoSave.Text = "AutoSave";
+            this.buttonAutoSave.UseVisualStyleBackColor = true;
+            this.buttonAutoSave.Click += new System.EventHandler(this.buttonAutoSave_Click);
+            // 
+            // buttonDeleteLog
+            // 
+            this.buttonDeleteLog.Location = new System.Drawing.Point(1000, 115);
+            this.buttonDeleteLog.Name = "buttonDeleteLog";
+            this.buttonDeleteLog.Size = new System.Drawing.Size(75, 23);
+            this.buttonDeleteLog.TabIndex = 15;
+            this.buttonDeleteLog.Text = "DeleteLog";
+            this.buttonDeleteLog.UseVisualStyleBackColor = true;
+            this.buttonDeleteLog.Click += new System.EventHandler(this.buttonDeleteLog_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1025, 373);
+            this.ClientSize = new System.Drawing.Size(1127, 373);
+            this.Controls.Add(this.buttonDeleteLog);
+            this.Controls.Add(this.buttonAutoSave);
+            this.Controls.Add(this.buttonExport);
             this.Controls.Add(this.textBoxVolAndCrt);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -237,6 +275,9 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBoxVolAndCrt;
         private System.Windows.Forms.Timer timerSecond;
+        private System.Windows.Forms.Button buttonExport;
+        private System.Windows.Forms.Button buttonAutoSave;
+        private System.Windows.Forms.Button buttonDeleteLog;
     }
 }
 
