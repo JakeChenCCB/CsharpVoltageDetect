@@ -48,6 +48,11 @@
             this.buttonExport = new System.Windows.Forms.Button();
             this.buttonAutoSave = new System.Windows.Forms.Button();
             this.buttonDeleteLog = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.comboBoxUartUart = new System.Windows.Forms.ComboBox();
+            this.buttonUart = new System.Windows.Forms.Button();
+            this.serialPortUart2 = new System.IO.Ports.SerialPort(this.components);
+            this.textBoxDisplay2 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // serialPortUart
@@ -116,6 +121,7 @@
             this.comboBoxUart1.Name = "comboBoxUart1";
             this.comboBoxUart1.Size = new System.Drawing.Size(121, 20);
             this.comboBoxUart1.TabIndex = 5;
+            this.comboBoxUart1.SelectedIndexChanged += new System.EventHandler(this.comboBoxUart1_SelectedIndexChanged);
             // 
             // buttonUart1Sw
             // 
@@ -185,11 +191,11 @@
             // 
             // textBoxVolAndCrt
             // 
-            this.textBoxVolAndCrt.Location = new System.Drawing.Point(597, 55);
+            this.textBoxVolAndCrt.Location = new System.Drawing.Point(535, 55);
             this.textBoxVolAndCrt.Multiline = true;
             this.textBoxVolAndCrt.Name = "textBoxVolAndCrt";
             this.textBoxVolAndCrt.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxVolAndCrt.Size = new System.Drawing.Size(396, 303);
+            this.textBoxVolAndCrt.Size = new System.Drawing.Size(499, 303);
             this.textBoxVolAndCrt.TabIndex = 12;
             // 
             // timerSecond
@@ -200,7 +206,7 @@
             // 
             // buttonExport
             // 
-            this.buttonExport.Location = new System.Drawing.Point(999, 55);
+            this.buttonExport.Location = new System.Drawing.Point(1040, 53);
             this.buttonExport.Name = "buttonExport";
             this.buttonExport.Size = new System.Drawing.Size(75, 23);
             this.buttonExport.TabIndex = 13;
@@ -210,7 +216,7 @@
             // 
             // buttonAutoSave
             // 
-            this.buttonAutoSave.Location = new System.Drawing.Point(1000, 85);
+            this.buttonAutoSave.Location = new System.Drawing.Point(1040, 86);
             this.buttonAutoSave.Name = "buttonAutoSave";
             this.buttonAutoSave.Size = new System.Drawing.Size(75, 23);
             this.buttonAutoSave.TabIndex = 14;
@@ -220,7 +226,7 @@
             // 
             // buttonDeleteLog
             // 
-            this.buttonDeleteLog.Location = new System.Drawing.Point(1000, 115);
+            this.buttonDeleteLog.Location = new System.Drawing.Point(1040, 115);
             this.buttonDeleteLog.Name = "buttonDeleteLog";
             this.buttonDeleteLog.Size = new System.Drawing.Size(75, 23);
             this.buttonDeleteLog.TabIndex = 15;
@@ -228,11 +234,57 @@
             this.buttonDeleteLog.UseVisualStyleBackColor = true;
             this.buttonDeleteLog.Click += new System.EventHandler(this.buttonDeleteLog_Click);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(25, 365);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(29, 12);
+            this.label3.TabIndex = 16;
+            this.label3.Text = "Uart";
+            // 
+            // comboBoxUartUart
+            // 
+            this.comboBoxUartUart.FormattingEnabled = true;
+            this.comboBoxUartUart.Location = new System.Drawing.Point(103, 365);
+            this.comboBoxUartUart.Name = "comboBoxUartUart";
+            this.comboBoxUartUart.Size = new System.Drawing.Size(121, 20);
+            this.comboBoxUartUart.TabIndex = 17;
+            // 
+            // buttonUart
+            // 
+            this.buttonUart.Location = new System.Drawing.Point(244, 361);
+            this.buttonUart.Name = "buttonUart";
+            this.buttonUart.Size = new System.Drawing.Size(75, 23);
+            this.buttonUart.TabIndex = 18;
+            this.buttonUart.Text = "Open";
+            this.buttonUart.UseVisualStyleBackColor = true;
+            this.buttonUart.Click += new System.EventHandler(this.buttonUart_Click);
+            // 
+            // serialPortUart2
+            // 
+            this.serialPortUart2.BaudRate = 115200;
+            this.serialPortUart2.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPortUart2_DataReceived);
+            // 
+            // textBoxDisplay2
+            // 
+            this.textBoxDisplay2.Location = new System.Drawing.Point(25, 403);
+            this.textBoxDisplay2.Multiline = true;
+            this.textBoxDisplay2.Name = "textBoxDisplay2";
+            this.textBoxDisplay2.ReadOnly = true;
+            this.textBoxDisplay2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBoxDisplay2.Size = new System.Drawing.Size(294, 59);
+            this.textBoxDisplay2.TabIndex = 19;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1127, 373);
+            this.ClientSize = new System.Drawing.Size(1127, 474);
+            this.Controls.Add(this.textBoxDisplay2);
+            this.Controls.Add(this.buttonUart);
+            this.Controls.Add(this.comboBoxUartUart);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.buttonDeleteLog);
             this.Controls.Add(this.buttonAutoSave);
             this.Controls.Add(this.buttonExport);
@@ -278,6 +330,11 @@
         private System.Windows.Forms.Button buttonExport;
         private System.Windows.Forms.Button buttonAutoSave;
         private System.Windows.Forms.Button buttonDeleteLog;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox comboBoxUartUart;
+        private System.Windows.Forms.Button buttonUart;
+        private System.IO.Ports.SerialPort serialPortUart2;
+        private System.Windows.Forms.TextBox textBoxDisplay2;
     }
 }
 

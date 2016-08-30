@@ -24,6 +24,7 @@ namespace VoltageDetect
         float mahSum = 0.0F;
         String filePath = String.Empty;
         String preDateTime = String.Empty;
+        byte percent = 0;
         public Form1()
         {
             InitializeComponent();
@@ -87,9 +88,54 @@ namespace VoltageDetect
                         }
                         comboBoxUart1.SelectedIndex = comboBoxUart1.Items.Count - 1;
                     }
+                    if(comboBoxUartUart.Enabled == true) {
+                        comboBoxUartUart.Items.Clear();
+                        foreach(string sName in sSubKeys) {
+                            string sValue = (string)keyCom.GetValue(sName);
+                            comboBoxUartUart.Items.Add(sValue);
+                        }
+                        comboBoxUartUart.SelectedIndex = comboBoxUartUart.Items.Count - 1;
+                    }
                     preComNum = comNum;
                 }
             }
+        }
+        private void serialPortUart2_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            byte[] cdcBytes = new byte[512];
+            int readLength = serialPortUart2.BytesToRead;
+
+            serialPortUart2.Read(cdcBytes, 0, readLength);
+            if(readLength == 14) {
+                if(cdcBytes[0] == 0x7E && cdcBytes[4] == 0x46 && cdcBytes[5] == 0x00) {
+                    percent = cdcBytes[10];
+                }
+            }
+            this.textBoxDisplay2.Invoke(     // 在拥有此控件的基础窗口句柄的线程上执行委托Invoke(Delegate)
+                                      // 即在textBox_ReceiveDate控件的父窗口form中执行委托.
+                new MethodInvoker( // 表示一个委托，该委托可执行托管代码中声明为 void 且不接
+                                   // 受任何参数的任何方法。在对控件的 Invoke 方法进行调用时
+                                   // 或需要一个简单委托又不想自己定义时可以使用该委托。
+                    delegate
+                    {   // 匿名方法,C#2.0的新功能，这是一种允许程序员将一段完整
+                        // 代码区块当成参数传递的程序代码编写技术，通过此种方法可以直接使用委托来设计事件响应程序
+                        // 以下就是你要在主线程上实现的功能，但是有一点要注意，这里不适宜处理过多的方法，因为C#消息机
+                        // 制是消息流水线响应机制，如果这里在主线程上处理语句的时间过长会导致主UI线程阻塞，停止响应或响
+                        // 应不顺畅,这时你的主form界面会延迟或卡死
+
+                        // 文本控件
+                        String newStr = String.Empty;
+                        for(int i = 0; i < readLength; i++) {
+                            newStr += String.Format("{0:X2}", cdcBytes[i]);
+                            newStr += " ";
+                        }
+                        textBoxDisplay2.AppendText(newStr + "   ".ToString());
+                        textBoxDisplay2.AppendText(Environment.NewLine);
+                        textBoxDisplay2.Select(textBoxDisplay2.TextLength, 0);
+                        textBoxDisplay2.ScrollToCaret();
+                    }
+                )
+            );
         }
         private void serialPortUart_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -114,8 +160,6 @@ namespace VoltageDetect
                                         newStr += Convert.ToString(cdcBytes[i] % 16, 16);
                                         newStr += " ";
                                     }
-                                    //                                    newStr += Convert.ToString(readLength);
-
                                     textBoxDisplay.AppendText(newStr);
                                     textBoxDisplay.AppendText(Environment.NewLine);
                                     textBoxDisplay.ScrollToCaret();
@@ -212,16 +256,6 @@ namespace VoltageDetect
                                             break;
                                     }
                                     labelValue.Text = newStr;
-
-                                    // 对TXT进行数据备份
-                                    //if(filePath != String.Empty) {
-                                    //    if(preDateTime != DateTime.Now.ToString()) {
-                                    //        StreamWriter sw = new StreamWriter(filePath, true);
-                                    //        preDateTime = DateTime.Now.ToString();
-                                    //        sw.WriteLine("" + DateTime.Now.ToString() + " " + newStr);
-                                    //        sw.Close();
-                                    //    }
-                                    //}
                                 }
                                 )
                                 );
@@ -259,8 +293,6 @@ namespace VoltageDetect
                                         newStr += Convert.ToString(cdc1Bytes[i] % 16, 16);
                                         newStr += " ";
                                     }
-                                    //                                    newStr += Convert.ToString(readLength);
-
                                     textBoxDisplay1.AppendText(newStr);
                                     textBoxDisplay1.AppendText(Environment.NewLine);
                                     textBoxDisplay1.ScrollToCaret();
@@ -359,16 +391,6 @@ namespace VoltageDetect
                                     }
                                    
                                     labelValue1.Text = newStr;
-
-                                    // 对TXT进行数据备份
-                                    //if(filePath != String.Empty) {
-                                    //    if(preDateTime != DateTime.Now.ToString()) {
-                                    //        StreamWriter sw = new StreamWriter(filePath, true);
-                                    //        preDateTime = DateTime.Now.ToString();
-                                    //        sw.WriteLine("" + DateTime.Now.ToString() + " " + newStr);
-                                    //        sw.Close();
-                                    //    }
-                                    //}
                                 }
                                 )
                                 );
@@ -414,7 +436,7 @@ namespace VoltageDetect
                 mahSum += (float.Parse(labelValue1.Text))/3600.0F;
             }
             if(buttonUartSw.Text == "Close" && buttonUart1Sw.Text == "Close") {
-                string str = count.ToString() + '\t' + labelValue.Text + '\t' + labelUint.Text + '\t' + labelValue1.Text + '\t' + labelUint1.Text + '\t' + mahSum.ToString() + '\t' + "mAh";
+                string str = count.ToString() + '\t' + labelValue.Text + '\t' + labelUint.Text + '\t' + labelValue1.Text + '\t' + labelUint1.Text + '\t' + mahSum.ToString() + '\t' + "mAh" + '\t' + percent.ToString();
                 textBoxVolAndCrt.AppendText(str);
                 textBoxVolAndCrt.AppendText(Environment.NewLine);
                 textBoxVolAndCrt.ScrollToCaret();
@@ -465,6 +487,35 @@ namespace VoltageDetect
             } if(File.Exists(@"log.txt")) {
                 File.Delete(@"log.txt");
             }
+        }
+
+        private void buttonUart_Click(object sender, EventArgs e)
+        {
+            if(buttonUart.Text == "Open") {
+                try {
+                    serialPortUart2.PortName = comboBoxUartUart.SelectedItem.ToString();
+                    serialPortUart2.Open();
+                    buttonUart.Text = "Close";
+                    comboBoxUartUart.Enabled = false;
+                } catch(Exception) {
+
+                }
+            } else {
+                try {
+                    serialPortUart2.Close();
+                } catch(Exception) {
+
+                } finally {
+                    buttonUart.Text = "Open";
+                    comboBoxUartUart.Enabled = true;
+                }
+
+            }
+        }
+
+        private void comboBoxUart1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
